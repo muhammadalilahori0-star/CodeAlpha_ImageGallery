@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gallery — Ali</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1210;
+    --card:#1b201c;
+    --line:#2a302b;
+    --text:#eef1ee;
+    --muted:#9aa39b;
+    --accent:#7dd77c;
+    --mono:'JetBrains Mono', monospace;
+    --sans:'Plus Jakarta Sans', sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:var(--bg);color:var(--text);font-family:var(--sans);
+    padding:60px 6%;
+  }
+  header{margin-bottom:40px;}
+  .eyebrow{font-family:var(--mono);color:var(--accent);font-size:0.85rem;letter-spacing:1px;margin-bottom:10px;}
+  h1{font-size:clamp(2rem,5vw,3rem);font-weight:800;letter-spacing:-1.5px;margin-bottom:10px;}
+  header p{color:var(--muted);max-width:520px;}
+
+  /* Filters */
+  .filters{display:flex;gap:10px;flex-wrap:wrap;margin:36px 0;}
+  .filter-btn{
+    font-family:var(--mono);font-size:0.85rem;padding:10px 20px;border-radius:24px;
+    border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;
+    transition:.25s;
+  }
+  .filter-btn:hover{color:var(--text);border-color:var(--accent);}
+  .filter-btn.active{background:var(--accent);color:#0f1210;border-color:var(--accent);font-weight:600;}
+
+  /* Grid */
+  .gallery{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+    gap:18px;
+  }
+  .gallery-item{
+    position:relative;border-radius:12px;overflow:hidden;cursor:pointer;
+    aspect-ratio:1/1;background:var(--card);border:1px solid var(--line);
+    opacity:0;transform:translateY(20px);transition:opacity .5s ease, transform .5s ease;
+  }
+  .gallery-item.show{opacity:1;transform:translateY(0);}
+  .gallery-item.hide{display:none;}
+  .gallery-item img{
+    width:100%;height:100%;object-fit:cover;display:block;
+    transition:transform .5s ease, filter .5s ease;
+  }
+  .gallery-item:hover img{transform:scale(1.08);}
+  .item-overlay{
+    position:absolute;inset:0;
+    background:linear-gradient(to top, rgba(15,18,16,0.85) 0%, transparent 55%);
+    display:flex;flex-direction:column;justify-content:flex-end;padding:16px;
+    opacity:0;transition:opacity .3s ease;
+  }
+  .gallery-item:hover .item-overlay{opacity:1;}
+  .item-overlay span{font-family:var(--mono);font-size:0.8rem;color:var(--accent);}
+  .item-overlay strong{font-size:1rem;}
+
+  /* Lightbox */
+  .lightbox{
+    position:fixed;inset:0;background:rgba(10,12,10,0.95);
+    display:flex;align-items:center;justify-content:center;
+    opacity:0;pointer-events:none;transition:opacity .3s ease;z-index:200;
+  }
+  .lightbox.open{opacity:1;pointer-events:auto;}
+  .lightbox-inner{max-width:80vw;max-height:80vh;position:relative;text-align:center;}
+  .lightbox-inner img{
+    max-width:80vw;max-height:75vh;border-radius:10px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  }
+  .lightbox-caption{margin-top:16px;font-family:var(--mono);color:var(--muted);font-size:0.9rem;}
+  .lb-close, .lb-prev, .lb-next{
+    position:absolute;background:var(--card);border:1px solid var(--line);color:var(--text);
+    width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;font-size:1.2rem;transition:.25s;
+  }
+  .lb-close:hover, .lb-prev:hover, .lb-next:hover{border-color:var(--accent);color:var(--accent);}
+  .lb-close{top:-60px;right:0;}
+  .lb-prev{top:50%;left:-70px;transform:translateY(-50%);}
+  .lb-next{top:50%;right:-70px;transform:translateY(-50%);}
+
+  @media(max-width:768px){
+    .lb-prev{left:10px;}
+    .lb-next{right:10px;}
+    .lb-close{top:10px;right:10px;}
+    .lightbox-inner img{max-width:90vw;max-height:65vh;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">// IMAGE GALLERY</div>
+  <h1>Visual Collection</h1>
+  <p>A category-filtered gallery with a full lightbox viewer — click any image to open, use arrows or keyboard to navigate.</p>
+</header>
+
+<div class="filters" id="filters">
+  <button class="filter-btn active" data-filter="all">All</button>
+  <button class="filter-btn" data-filter="nature">Nature</button>
+  <button class="filter-btn" data-filter="city">City</button>
+  <button class="filter-btn" data-filter="people">People</button>
+</div>
+
+<div class="gallery" id="gallery"></div>
+
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-inner">
+    <div class="lb-close" id="lbClose">✕</div>
+    <div class="lb-prev" id="lbPrev">‹</div>
+    <img id="lbImg" src="" alt="">
+    <div class="lightbox-caption" id="lbCaption"></div>
+    <div class="lb-next" id="lbNext">›</div>
+  </div>
+</div>
+
+<script>
+  // ---- Replace this array with your own images ----
+  const images = [
+    { src: "https://picsum.photos/id/10/600/600", title: "Forest Path", category: "nature" },
+    { src: "https://picsum.photos/id/1015/600/600", title: "River Bend", category: "nature" },
+    { src: "https://picsum.photos/id/1016/600/600", title: "Mountain Ridge", category: "nature" },
+    { src: "https://picsum.photos/id/1024/600/600", title: "Downtown Grid", category: "city" },
+    { src: "https://picsum.photos/id/1031/600/600", title: "Night Skyline", category: "city" },
+    { src: "https://picsum.photos/id/1040/600/600", title: "Street Corner", category: "city" },
+    { src: "https://picsum.photos/id/1005/600/600", title: "Portrait Study", category: "people" },
+    { src: "https://picsum.photos/id/1011/600/600", title: "Candid Walk", category: "people" },
+    { src: "https://picsum.photos/id/1027/600/600", title: "Quiet Moment", category: "people" }
+  ];
+
+  const gallery = document.getElementById('gallery');
+  let currentFilter = 'all';
+  let currentIndex = 0;
+
+  function renderGallery(){
+    gallery.innerHTML = '';
+    images.forEach((img, i) => {
+      const item = document.createElement('div');
+      item.className = 'gallery-item show';
+      item.dataset.category = img.category;
+      item.dataset.index = i;
+      item.innerHTML = `
+        <img src="${img.src}" alt="${img.title}" loading="lazy">
+        <div class="item-overlay">
+          <span>${img.category}</span>
+          <strong>${img.title}</strong>
+        </div>
+      `;
+      item.addEventListener('click', () => openLightbox(i));
+      gallery.appendChild(item);
+    });
+    applyFilter(currentFilter);
+  }
+
+  function applyFilter(filter){
+    currentFilter = filter;
+    document.querySelectorAll('.gallery-item').forEach(item => {
+      const match = filter === 'all' || item.dataset.category === filter;
+      item.classList.toggle('hide', !match);
+      item.classList.toggle('show', match);
+    });
+  }
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      applyFilter(btn.dataset.filter);
+    });
+  });
+
+  // Lightbox logic
+  const lightbox = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lbImg');
+  const lbCaption = document.getElementById('lbCaption');
+
+  function getVisibleIndexes(){
+    return images
+      .map((img, i) => i)
+      .filter(i => currentFilter === 'all' || images[i].category === currentFilter);
+  }
+
+  function openLightbox(index){
+    currentIndex = index;
+    updateLightboxImage();
+    lightbox.classList.add('open');
+  }
+
+  function updateLightboxImage(){
+    const img = images[currentIndex];
+    lbImg.src = img.src;
+    lbImg.alt = img.title;
+    lbCaption.textContent = `${img.title} — ${img.category}`;
+  }
+
+  function closeLightbox(){
+    lightbox.classList.remove('open');
+  }
+
+  function showNext(){
+    const visible = getVisibleIndexes();
+    const pos = visible.indexOf(currentIndex);
+    currentIndex = visible[(pos + 1) % visible.length];
+    updateLightboxImage();
+  }
+
+  function showPrev(){
+    const visible = getVisibleIndexes();
+    const pos = visible.indexOf(currentIndex);
+    currentIndex = visible[(pos - 1 + visible.length) % visible.length];
+    updateLightboxImage();
+  }
+
+  document.getElementById('lbClose').addEventListener('click', closeLightbox);
+  document.getElementById('lbNext').addEventListener('click', showNext);
+  document.getElementById('lbPrev').addEventListener('click', showPrev);
+  lightbox.addEventListener('click', (e) => { if(e.target === lightbox) closeLightbox(); });
+
+  document.addEventListener('keydown', (e) => {
+    if(!lightbox.classList.contains('open')) return;
+    if(e.key === 'Escape') closeLightbox();
+    if(e.key === 'ArrowRight') showNext();
+    if(e.key === 'ArrowLeft') showPrev();
+  });
+
+  renderGallery();
+</script>
+
+</body>
+</html>
