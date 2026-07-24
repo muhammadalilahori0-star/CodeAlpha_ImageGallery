@@ -26,7 +26,6 @@
   h1{font-size:clamp(2rem,5vw,3rem);font-weight:800;letter-spacing:-1.5px;margin-bottom:10px;}
   header p{color:var(--muted);max-width:520px;}
 
-  /* Filters */
   .filters{display:flex;gap:10px;flex-wrap:wrap;margin:36px 0;}
   .filter-btn{
     font-family:var(--mono);font-size:0.85rem;padding:10px 20px;border-radius:24px;
@@ -36,7 +35,6 @@
   .filter-btn:hover{color:var(--text);border-color:var(--accent);}
   .filter-btn.active{background:var(--accent);color:#0f1210;border-color:var(--accent);font-weight:600;}
 
-  /* Grid */
   .gallery{
     display:grid;
     grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
@@ -64,7 +62,6 @@
   .item-overlay span{font-family:var(--mono);font-size:0.8rem;color:var(--accent);}
   .item-overlay strong{font-size:1rem;}
 
-  /* Lightbox */
   .lightbox{
     position:fixed;inset:0;background:rgba(10,12,10,0.95);
     display:flex;align-items:center;justify-content:center;
@@ -125,15 +122,53 @@
 <script>
   // ---- Replace this array with your own images ----
   const images = [
+    // Nature (14)
     { src: "https://picsum.photos/id/10/600/600", title: "Forest Path", category: "nature" },
+    { src: "https://picsum.photos/id/15/600/600", title: "Lakeside Rocks", category: "nature" },
+    { src: "https://picsum.photos/id/29/600/600", title: "Misty Woods", category: "nature" },
+    { src: "https://picsum.photos/id/104/600/600", title: "Golden Field", category: "nature" },
+    { src: "https://picsum.photos/id/110/600/600", title: "Green Hills", category: "nature" },
     { src: "https://picsum.photos/id/1015/600/600", title: "River Bend", category: "nature" },
     { src: "https://picsum.photos/id/1016/600/600", title: "Mountain Ridge", category: "nature" },
+    { src: "https://picsum.photos/id/1018/600/600", title: "Valley View", category: "nature" },
+    { src: "https://picsum.photos/id/1021/600/600", title: "Alpine Lake", category: "nature" },
+    { src: "https://picsum.photos/id/1039/600/600", title: "Sunlit Trail", category: "nature" },
+    { src: "https://picsum.photos/id/1043/600/600", title: "Wild Meadow", category: "nature" },
+    { src: "https://picsum.photos/id/1044/600/600", title: "Coastal Cliffs", category: "nature" },
+    { src: "https://picsum.photos/id/1053/600/600", title: "Autumn Grove", category: "nature" },
+    { src: "https://picsum.photos/id/1058/600/600", title: "Desert Dune", category: "nature" },
+
+    // City (14)
     { src: "https://picsum.photos/id/1024/600/600", title: "Downtown Grid", category: "city" },
     { src: "https://picsum.photos/id/1031/600/600", title: "Night Skyline", category: "city" },
     { src: "https://picsum.photos/id/1040/600/600", title: "Street Corner", category: "city" },
+    { src: "https://picsum.photos/id/164/600/600", title: "Rooftop View", category: "city" },
+    { src: "https://picsum.photos/id/183/600/600", title: "Old Town Alley", category: "city" },
+    { src: "https://picsum.photos/id/201/600/600", title: "Harbor Lights", category: "city" },
+    { src: "https://picsum.photos/id/219/600/600", title: "Glass Towers", category: "city" },
+    { src: "https://picsum.photos/id/222/600/600", title: "Bridge Crossing", category: "city" },
+    { src: "https://picsum.photos/id/238/600/600", title: "Metro Station", category: "city" },
+    { src: "https://picsum.photos/id/244/600/600", title: "Neon District", category: "city" },
+    { src: "https://picsum.photos/id/247/600/600", title: "City Park", category: "city" },
+    { src: "https://picsum.photos/id/260/600/600", title: "Skyline Dusk", category: "city" },
+    { src: "https://picsum.photos/id/271/600/600", title: "Busy Boulevard", category: "city" },
+    { src: "https://picsum.photos/id/292/600/600", title: "Waterfront Blocks", category: "city" },
+
+    // People (14)
     { src: "https://picsum.photos/id/1005/600/600", title: "Portrait Study", category: "people" },
     { src: "https://picsum.photos/id/1011/600/600", title: "Candid Walk", category: "people" },
-    { src: "https://picsum.photos/id/1027/600/600", title: "Quiet Moment", category: "people" }
+    { src: "https://picsum.photos/id/1027/600/600", title: "Quiet Moment", category: "people" },
+    { src: "https://picsum.photos/id/1012/600/600", title: "Morning Light", category: "people" },
+    { src: "https://picsum.photos/id/1025/600/600", title: "Street Style", category: "people" },
+    { src: "https://picsum.photos/id/1074/600/600", title: "Warm Smile", category: "people" },
+    { src: "https://picsum.photos/id/1080/600/600", title: "Quiet Thought", category: "people" },
+    { src: "https://picsum.photos/id/338/600/600", title: "City Wanderer", category: "people" },
+    { src: "https://picsum.photos/id/342/600/600", title: "Golden Hour Portrait", category: "people" },
+    { src: "https://picsum.photos/id/349/600/600", title: "Reflective Gaze", category: "people" },
+    { src: "https://picsum.photos/id/366/600/600", title: "Casual Pose", category: "people" },
+    { src: "https://picsum.photos/id/385/600/600", title: "Evening Stroll", category: "people" },
+    { src: "https://picsum.photos/id/400/600/600", title: "Bright Expression", category: "people" },
+    { src: "https://picsum.photos/id/433/600/600", title: "Candid Laugh", category: "people" }
   ];
 
   const gallery = document.getElementById('gallery');
@@ -177,7 +212,6 @@
     });
   });
 
-  // Lightbox logic
   const lightbox = document.getElementById('lightbox');
   const lbImg = document.getElementById('lbImg');
   const lbCaption = document.getElementById('lbCaption');
